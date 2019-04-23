@@ -9,6 +9,7 @@ import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
+import appendQuery from 'append-query';
 import axios from 'axios';
 
 const hostUrl = "https://" + window.location.host + window.contextPath + "/apis/checklist";
