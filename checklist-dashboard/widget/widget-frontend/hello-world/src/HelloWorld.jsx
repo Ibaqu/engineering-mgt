@@ -68,16 +68,19 @@ class HelloWorld extends Component {
             productNameList: [],
             selected_ProductVersion: '',
             productVersionList: [],
-            dependencySummary : '',
-            codeCoverage : '',
-            gitIssues : '',
-            mergedPRCount : '',
-            jiraPerf : '',
-            jiraSecScan : '',
-            jiraCommitment : '',
-            jiraSecCust : '',
-            jiraSecExt : '',
-            jiraSecInt : '',
+            
+            dependencySummary : { dependencySummary : 0, refLink : ""},
+            codeCoverage : { instructionCov : 0, branchCov : 0, complexityCov : 0, 
+                lineCov : 0, methodCov : 0, classCov : 0, refLink : ""
+            },
+            gitIssues : { L1Issues : 0, L2Issues : 0, L3Issues : 0, refLink :"" },
+            mergedPRCount : { mprCount : 0, refLink : "" },
+            jiraPerf : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraCommitment : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecCust : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecExt : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecInt : { totalIssues : 0, openIssues : 0, refLink : "" },
         };
 
         this.handleChange_ProductName = event => {
@@ -87,10 +90,11 @@ class HelloWorld extends Component {
             }, function () {
                 console.log("STATE :: Selected Product Name :");
                 console.log(this.state.selected_ProductName);
-            });   
+            });  
         };
 
         this.handleChange_ProductVersion = event => {
+            console.log("Handling change");
             this.setState ({ [event.target.name] : event.target.value });
             this.setState ({ 
                 selected_ProductVersion : event.target.value
@@ -130,7 +134,10 @@ class HelloWorld extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         if(this.state.selected_ProductName !== prevState.selected_ProductName) {
-            console.log("Product Name has changed")            
+            console.log("Product Name has changed") 
+            console.log("Resetting metrics");
+            this.resetState();
+           
             let versionURL = hostUrl + '/versions/' + this.state.selected_ProductName;
             //let versionURL = "https://www.mocky.io/v2/5cbed19d300000ba069ce2d3";
             axios.create({
@@ -169,31 +176,36 @@ class HelloWorld extends Component {
             let infoTitle = { version : this.state.selected_ProductVersion.versionTitle }
     
             let dependencyURL = hostUrl + '/dependency/' + this.state.selected_ProductName;
+            //let dependencyURL = "https://www.mocky.io/v2/5cc011df310000170e036016";
             console.log("Dependency URL :" + dependencyURL);
 
             let codeCoverageURL = hostUrl + '/codeCoverage/' + this.state.selected_ProductName;
-            console.log("Code Coverage URL :" +codeCoverageURL);
+            //let codeCoverageURL = "https://www.mocky.io/v2/5cc0121a3100009f0a036018";
+            console.log("Code Coverage URL :" + codeCoverageURL);
 
             let gitIssuesURL = hostUrl + '/gitIssues/' + this.state.selected_ProductName;
+            //let gitIssuesURL = "https://www.mocky.io/v2/5cc01e0a310000580b036090";
             gitIssuesURL = appendQuery(gitIssuesURL, infoVersion);
-            console.log("Git Issues URL :" +gitIssuesURL);
+            console.log("Git Issues URL :" + gitIssuesURL);
             
-            let mergedPRCountURL = hostUrl + '/mprCount/' + this.state.selected_ProductName;    
+            let mergedPRCountURL = hostUrl + '/mprCount/' + this.state.selected_ProductName;
+            //let mergedPRCountURL = "https://www.mocky.io/v2/5cc012933100007e0f036024"    
             mergedPRCountURL = appendQuery(mergedPRCountURL, infoTitle);
-            console.log("Merged PR URL :" +mergedPRCountURL);
+            console.log("Merged PR URL :" + mergedPRCountURL);
 
             let jiraIssueTypes = ['perf-report', 'sec-scan', 'commitment', 'sec-cust', 'sec-ext', 'sec-int'];
             
 
             //Jira issue : Performance Report
-            let infoPerf = {  version : selected_ProductVersion.versionNumber, issueType : 'perf-report' }
-            let jiraUrl = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
-            jiraUrl = appendQuery(jiraUrl, infoPerf);
+            let infoPerf = {  version : this.state.selected_ProductVersion.versionNumber, issueType : 'perf-report' }
+            let jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
+            //let jiraURL = "https://www.mocky.io/v2/5cc01cee3100007d0e036086";
+            jiraURL = appendQuery(jiraURL, infoPerf);
 
             axios.create({
                 withCredentials : false,
             })
-            .get(jiraUrl)
+            .get(jiraURL)
             .then(
                 res => {
                     var response = res.data;
@@ -208,14 +220,15 @@ class HelloWorld extends Component {
             });
 
             //Jira issue : Security Scan
-            let infoSecScan = {  version : selected_ProductVersion.versionNumber, issueType : 'sec-scan' }
+            let infoSecScan = {  version : this.state.selected_ProductVersion.versionNumber, issueType : 'sec-scan' }
             jiraUrl = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
-            jiraUrl = appendQuery(jiraUrl, infoSecScan);
+            //jiraURL = "https://www.mocky.io/v2/5cc01cbb310000bf0b036084";
+            jiraURL = appendQuery(jiraURL, infoSecScan);
 
             axios.create({
                 withCredentials : false,
             })
-            .get(jiraUrl)
+            .get(jiraURL)
             .then(
                 res => {
                     var response = res.data;
@@ -230,14 +243,15 @@ class HelloWorld extends Component {
             });
 
             //Jira issue : Customer Commitment
-            let infoCommitment = { version : selected_ProductVersion.versionNumber, issueType : 'commitment' }
-            jiraUrl = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
-            jiraUrl = appendQuery(jiraUrl, infoCommitment);
+            let infoCommitment = {version : this.state.selected_ProductVersion.versionNumber, issueType : 'commitment'}
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
+            //jiraURL = "https://www.mocky.io/v2/5cc01d663100007d0e03608a";
+            jiraURL = appendQuery(jiraURL, infoCommitment);
 
             axios.create({
                 withCredentials : false,
             })
-            .get(jiraUrl)
+            .get(jiraURL)
             .then(
                 res => {
                     var response = res.data;
@@ -252,14 +266,15 @@ class HelloWorld extends Component {
             });
 
             //Jira issue : Security customer
-            let infoSecCust = {  version : selected_ProductVersion.versionNumber, issueType : 'sec-cust' }
-            jiraUrl = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
-            jiraUrl = appendQuery(jiraUrl, infoSecCust);
+            let infoSecCust = {  version : this.state.selected_ProductVersion.versionNumber, issueType : 'sec-cust' }
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
+            //jiraURL = "https://www.mocky.io/v2/5cc01cee3100007d0e036086";
+            jiraURL = appendQuery(jiraURL, infoSecCust);
 
             axios.create({
                 withCredentials : false,
             })
-            .get(jiraUrl)
+            .get(jiraURL)
             .then(
                 res => {
                     var response = res.data;
@@ -274,14 +289,15 @@ class HelloWorld extends Component {
             });
 
             //Jira issue : Security External
-            let infoSecExt = { version : selected_ProductVersion.versionNumber, issueType : 'sec-ext' }
-            jiraUrl = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
-            jiraUrl = appendQuery(jiraUrl, infoSecExt);
+            let infoSecExt = { version : this.state.selected_ProductVersion.versionNumber, issueType : 'sec-ext' }
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
+            //jiraURL = "https://www.mocky.io/v2/5cc01d94310000bf0b03608d";
+            jiraURL = appendQuery(jiraURL, infoSecExt);
 
             axios.create({
                 withCredentials : false,
             })
-            .get(jiraUrl)
+            .get(jiraURL)
             .then(
                 res => {
                     var response = res.data;
@@ -296,14 +312,15 @@ class HelloWorld extends Component {
             });
 
             //Jira issue : Security Internal
-            let infoSecInt = {  version : selected_ProductVersion.versionNumber, issueType : 'sec-int' }
-            jiraUrl = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
-            jiraUrl = appendQuery(jiraUrl, infoSecInt);
+            let infoSecInt = {  version : this.state.selected_ProductVersion.versionNumber, issueType : 'sec-int' }
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
+            //jiraURL = "https://www.mocky.io/v2/5cc01d663100007d0e03608a";
+            jiraURL = appendQuery(jiraURL, infoSecInt);
 
             axios.create({
                 withCredentials : false,
             })
-            .get(jiraUrl)
+            .get(jiraURL)
             .then(
                 res => {
                     var response = res.data;
@@ -316,9 +333,6 @@ class HelloWorld extends Component {
             ).catch(error => {
                 console.log(error);
             });
-
-
-
 
             //Dependency Summary
             axios.create({
@@ -397,6 +411,23 @@ class HelloWorld extends Component {
 
     }
 
+    resetState() {
+        this.setState({
+            dependencySummary : { dependencySummary : 0, refLink : ""},
+            codeCoverage : { instructionCov : 0, branchCov : 0, complexityCov : 0, 
+                lineCov : 0, methodCov : 0, classCov : 0, refLink : ""
+            },
+            gitIssues : { L1Issues : 0, L2Issues : 0, L3Issues : 0, refLink :"" },
+            mergedPRCount : { mprCount : 0, refLink : "" },
+            jiraPerf : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraCommitment : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecCust : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecExt : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecInt : { totalIssues : 0, openIssues : 0, refLink : "" },
+        })
+    }
+
     render() {
         let reactTheme = createMuiTheme({
             palette : {
@@ -414,7 +445,7 @@ class HelloWorld extends Component {
 
                     {/* Heading Div */}
                     <div>
-                        <h2><center> Release Readiness Metrics? </center></h2>
+                        <h2><center> Release Readiness Metrics </center></h2>
                     </div>
 
                     {/* Select Div */}
