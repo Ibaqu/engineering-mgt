@@ -11,9 +11,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import axios from 'axios';
 import appendQuery from 'append-query';
-
 const hostUrl = "https://" + window.location.host + window.contextPath + "/apis/checklist";
-
 
 const styles = theme => ({
     root: {
@@ -22,14 +20,15 @@ const styles = theme => ({
 });
 
 const PageWrapper_style = {
-    padding : '30px',
+    paddingRight : '20px',
+    paddingLeft : '20px',
     background : 'transparent',
     boxShadow : 'none'
 };
 
 const SelectDiv_style = {
     overflowX: "auto",
-    padding : '20px'
+    padding : '5px'
 };
 
 const FormControl_style = {
@@ -44,20 +43,42 @@ const TableDiv_style = {
     overflowX: "auto",
 };
 
-const TableHeadCell_style = {
-    border : '1px solid rgba(0, 0, 0, 0.1)',
-    padding : '5px 7px',
-    borderRadius : '3px',
-    fontSize : '14px',
-    fontWeight : 'normal',
-    outline : 'none',
-    textAlign : 'center'
-};
-
 const TableBorder_style = {
     border: "2px solid #aaa",
     overflow: "auto"
 };
+
+const RED = {
+    height: '20px',
+    width: '20px',
+    backgroundColor : '#FF3C33',
+    borderRadius: '50%',
+    display: 'inline-block'
+}
+
+const YELLOW = {
+    height: '20px',
+    width: '20px',
+    backgroundColor: '#FFDD33',
+    borderRadius: '50%',
+    display: 'inline-block'
+}
+
+const GREEN = {
+    height: '20px',
+    width: '20px',
+    backgroundColor: '#79F63B',
+    borderRadius: '50%',
+    display: 'inline-block'
+}
+
+const GREY = {
+    height: '20px',
+    width: '20px',
+    backgroundColor: '#AFAFAF',
+    borderRadius: '50%',
+    display: 'inline-block'
+}
 
 class Checklist extends Component {
     
@@ -68,29 +89,46 @@ class Checklist extends Component {
             productNameList: [],
             selected_ProductVersion: '',
             productVersionList: [],
-            
-            dependencySummary : { dependencySummary : 0, refLink : ""},
+
+            jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" }, 
+            jiraSecScanStatus : { status : GREY },
+
+            jiraPerf : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraPerfStatus : { status : GREY },
+
+            jiraCommitment : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraCommitmentStatus : { status : GREY },
+
+            jiraSecCust : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecCustStatus : { status : GREY },
+
+            jiraSecExt : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecExtStatus : { status : GREY },
+
+            jiraSecInt : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecIntStatus : { status : GREY },
+
+            gitIssues : { L1Issues : 0, L2Issues : 0, L3Issues : 0, refLink :"" },
+            gitIssueL1Status : { status : GREY },
+            gitIssueL2Status : { status : GREY },
+            gitIssueL3Status : { status : GREY },
+
             codeCoverage : { instructionCov : 0, branchCov : 0, complexityCov : 0, 
                 lineCov : 0, methodCov : 0, classCov : 0, refLink : ""
             },
-            gitIssues : { L1Issues : 0, L2Issues : 0, L3Issues : 0, refLink :"" },
+            codeCoverageStatus : { status : GREY },
+
             mergedPRCount : { mprCount : 0, refLink : "" },
-            jiraPerf : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" }, 
-            jiraSecScanStatus : { status : "Good"},
-            jiraCommitment : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecCust : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecExt : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecInt : { totalIssues : 0, openIssues : 0, refLink : "" },
+            mergedPRCountStatus : { status : GREY },
+            
+            dependencySummary : { dependencySummary : 0, refLink : ""},
+            dependenctSummaryStatus : { status : GREY },
         };
 
         this.handleChange_ProductName = event => {
             this.setState ({ [event.target.name] : event.target.value });
             this.setState({
                 selected_ProductName : event.target.value
-            }, function () {
-                console.log("STATE :: Selected Product Name :");
-                console.log(this.state.selected_ProductName);
             });  
         };
 
@@ -132,7 +170,7 @@ class Checklist extends Component {
             console.log(error)
         });           
          
-    } //End of componentDidMount
+    }
 
     componentDidUpdate(prevProps, prevState) {
         if(this.state.selected_ProductName !== prevState.selected_ProductName) {
@@ -175,58 +213,33 @@ class Checklist extends Component {
         if(this.state.selected_ProductVersion !== prevState.selected_ProductVersion) {
             console.log("Product version has changed");
             let infoVersion = { version : this.state.selected_ProductVersion.versionNumber }
-    
-            let dependencyURL = hostUrl + '/dependency/' + this.state.selected_ProductName;
-            //let dependencyURL = "https://www.mocky.io/v2/5cc011df310000170e036016";
-            console.log("Dependency URL :" + dependencyURL);
-
-            let codeCoverageURL = hostUrl + '/codeCoverage/' + this.state.selected_ProductName;
-            //let codeCoverageURL = "https://www.mocky.io/v2/5cc0121a3100009f0a036018";
-            console.log("Code Coverage URL :" + codeCoverageURL);
-
+            let infoTitle = { version : this.state.selected_ProductVersion.versionTitle }
+            
             let gitIssuesURL = hostUrl + '/gitIssues/' + this.state.selected_ProductName;
             //let gitIssuesURL = "https://www.mocky.io/v2/5cc01e0a310000580b036090";
             gitIssuesURL = appendQuery(gitIssuesURL, infoVersion);
             console.log("Git Issues URL :" + gitIssuesURL);
+
+            let codeCoverageURL = hostUrl + '/codeCoverage/' + this.state.selected_ProductName;
+            //let codeCoverageURL = "https://www.mocky.io/v2/5cc0121a3100009f0a036018";
+            console.log("Code Coverage URL :" + codeCoverageURL);
             
             let mergedPRCountURL = hostUrl + '/mprCount/' + this.state.selected_ProductName;
             //let mergedPRCountURL = "https://www.mocky.io/v2/5cc012933100007e0f036024"    
             mergedPRCountURL = appendQuery(mergedPRCountURL, infoTitle);
             console.log("Merged PR URL :" + mergedPRCountURL);
 
+            let dependencyURL = hostUrl + '/dependency/' + this.state.selected_ProductName;
+            //let dependencyURL = "https://www.mocky.io/v2/5cc011df310000170e036016";
+            console.log("Dependency URL :" + dependencyURL);
+
             let jiraIssueTypes = ['perf-report', 'sec-scan', 'commitment', 'sec-cust', 'sec-ext', 'sec-int'];
             
-
-            //Jira issue : Performance Report
-            let infoPerf = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'perf-report' }
-            let jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
-            //let jiraURL = "https://www.mocky.io/v2/5cc01cee3100007d0e036086";
-            jiraURL = appendQuery(jiraURL, infoPerf);
-
-            axios.create({
-                withCredentials : false,
-            })
-            .get(jiraURL)
-            .then(
-                res => {
-                    var response = res.data;
-                    this.setState({ jiraPerf : response }, 
-                        function() {
-                            console.log(this.state.jiraPerf);
-                        }
-                    );
-                }
-            ).catch(error => {
-                console.log(error);
-            });
-
-            var test = this.state.jiraSecScanStatus.openIssues;
-            console.log(test);
-
             //Jira issue : Security Scan
+            console.log(" JIRA Security Scan ");
             let infoSecScan = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'sec-scan' }
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
-            //jiraURL = "https://www.mocky.io/v2/5cc01cbb310000bf0b036084";
+            let jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
+            //let jiraURL = "https://www.mocky.io/v2/5cc01cbb310000bf0b036084";
             jiraURL = appendQuery(jiraURL, infoSecScan);
 
             axios.create({
@@ -235,10 +248,41 @@ class Checklist extends Component {
             .get(jiraURL)
             .then(
                 res => {
-                    var response = res.data;
-                    this.setState({ jiraSecScan : response }, 
+                    this.setState({ jiraSecScan : res.data }, 
                         function() {
-                            console.log(this.state.jiraSecScan);
+                            if(this.state.jiraSecScan.openIssues > 0) {
+                                this.setState({ jiraSecScanStatus : { status : RED } }); 
+                            } else {
+                                this.setState({ jiraSecScanStatus : { status : GREEN } });
+                            }
+                        }
+                    );
+                }
+            ).catch(error => {
+                console.log(error);
+            });
+
+            //Jira issue : Performance Report
+            console.log(" JIRA Performance Report ");
+            let infoPerf = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'perf-report' }
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
+            //jiraURL = "https://www.mocky.io/v2/5cc01cee3100007d0e036086";
+            jiraURL = appendQuery(jiraURL, infoPerf);
+
+            axios.create({
+                withCredentials : false,
+            })
+            .get(jiraURL)
+            .then(
+                res => {
+                    //var response = res.data;
+                    this.setState({ jiraPerf : res.data }, 
+                        function() {
+                            if(this.state.jiraPerf.openIssues > 0) {
+                                this.setState({ jiraPerfStatus : { status : RED } });
+                            } else {
+                                this.setState({ jiraPerfStatus : { status : GREEN } });
+                            }
                         }
                     );
                 }
@@ -248,7 +292,7 @@ class Checklist extends Component {
 
             //Jira issue : Customer Commitment
             let infoCommitment = {version : this.state.selected_ProductVersion.versionTitle, issueType : 'commitment'}
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
             //jiraURL = "https://www.mocky.io/v2/5cc01d663100007d0e03608a";
             jiraURL = appendQuery(jiraURL, infoCommitment);
 
@@ -258,10 +302,13 @@ class Checklist extends Component {
             .get(jiraURL)
             .then(
                 res => {
-                    var response = res.data;
-                    this.setState({ jiraCommitment : response }, 
+                    this.setState({ jiraCommitment : res.data }, 
                         function() {
-                            console.log(this.state.jiraCommitment);
+                            if(this.state.jiraCommitment.openIssues > 0) {
+                                this.setState({ jiraCommitmentStatus : { status : RED }});
+                            } else {
+                                this.setState({ jiraCommitmentStatus : { status : GREEN }})
+                            }
                         }
                     );
                 }
@@ -271,7 +318,7 @@ class Checklist extends Component {
 
             //Jira issue : Security customer
             let infoSecCust = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'sec-cust' }
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
             //jiraURL = "https://www.mocky.io/v2/5cc01cee3100007d0e036086";
             jiraURL = appendQuery(jiraURL, infoSecCust);
 
@@ -281,10 +328,13 @@ class Checklist extends Component {
             .get(jiraURL)
             .then(
                 res => {
-                    var response = res.data;
-                    this.setState({ jiraSecCust : response }, 
+                    this.setState({ jiraSecCust : res.data }, 
                         function() {
-                            console.log(this.state.jiraSecCust);
+                            if(this.state.jiraSecCust.openIssues > 0) {
+                                this.setState( { jiraSecCustStatus : { status : RED }});
+                            } else {
+                                this.setState( { jiraSecCustStatus : { status : GREEN }});
+                            }
                         }
                     );
                 }
@@ -294,8 +344,8 @@ class Checklist extends Component {
 
             //Jira issue : Security External
             let infoSecExt = { version : this.state.selected_ProductVersion.versionTitle, issueType : 'sec-ext' }
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
-            //jiraURL = "https://www.mocky.io/v2/5cc01d94310000bf0b03608d";
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
+            //jiraURL = "https://www.mocky.io/v2/5cc2d6b33300002b007e54bc";
             jiraURL = appendQuery(jiraURL, infoSecExt);
 
             axios.create({
@@ -304,10 +354,13 @@ class Checklist extends Component {
             .get(jiraURL)
             .then(
                 res => {
-                    var response = res.data;
-                    this.setState({ jiraSecExt : response }, 
+                    this.setState({ jiraSecExt : res.data}, 
                         function() {
-                            console.log(this.state.jiraSecExt);
+                            if(this.state.jiraSecExt.openIssues > 0) {
+                                this.setState( { jiraSecExtStatus : { status : RED }});
+                            } else {
+                                this.setState( { jiraSecExtStatus : { status : GREEN }});
+                            }
                         }
                     );
                 }
@@ -317,7 +370,7 @@ class Checklist extends Component {
 
             //Jira issue : Security Internal
             let infoSecInt = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'sec-int' }
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selectedProductName;
+            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
             //jiraURL = "https://www.mocky.io/v2/5cc01d663100007d0e03608a";
             jiraURL = appendQuery(jiraURL, infoSecInt);
 
@@ -327,28 +380,48 @@ class Checklist extends Component {
             .get(jiraURL)
             .then(
                 res => {
-                    var response = res.data;
-                    this.setState({ jiraSecInt : response }, 
+                    this.setState({ jiraSecInt : res.data}, 
                         function() {
-                            console.log(this.state.jiraSecInt);
+                            if(this.state.jiraSecInt.openIssues > 0) {
+                                this.setState( { jiraSecIntStatus : { status : RED }});
+                            } else {
+                                this.setState( { jiraSecIntStatus : { status : GREEN }});
+                            }
                         }
                     );
                 }
             ).catch(error => {
                 console.log(error);
             });
-
-            //Dependency Summary
+      
+            //Git issues 
             axios.create({
                 withCredentials : false,
             })
-            .get(dependencyURL)
+            .get(gitIssuesURL)
             .then(
                 res => {
-                    var response = res.data;
-                    this.setState({ dependencySummary : response }, 
+                    this.setState( { gitIssues : res.data},
                         function() {
-                            console.log(this.state.dependencySummary);
+                            if(this.state.gitIssues.L1Issues > 0) {
+                                this.setState( { gitIssueL1Status : { status : RED }});
+                            } else {
+                                this.setState( { gitIssueL1Status : { status : GREEN }});
+                            }
+
+                            if(this.state.gitIssues.L2Issues > 0 && this.state.gitIssues.L2Issues <= 5) {
+                                this.setState( { gitIssueL2Status : { status : YELLOW }});
+                            } else if(this.state.gitIssues.L2Issues > 5) {
+                                this.setState( { gitIssueL2Status : { status : RED }});
+                            } else {
+                                this.setState( { gitIssueL2Status : { status : GREEN }});
+                            }
+
+                            if(this.state.gitIssues.L3Issues > 50) {
+                                this.setState( { gitIssueL3Status : { status : YELLOW }});
+                            } else {
+                                this.setState( { gitIssueL3Status : { status : GREEN }})
+                            }
                         }
                     );
                 }
@@ -363,29 +436,15 @@ class Checklist extends Component {
             .get(codeCoverageURL)
             .then(
                 res => {
-                    var response = res.data;
-                    this.setState({codeCoverage : response },
+                    this.setState({codeCoverage : res.data },
                         function() {
-                            console.log(this.state.codeCoverage);
-                        }
-                    );
-                }
-            ).catch(error => {
-                console.log(error);
-            });
-
-            
-            //Git issues 
-            axios.create({
-                withCredentials : false,
-            })
-            .get(gitIssuesURL)
-            .then(
-                res => {
-                    var response = res.data;
-                    this.setState( { gitIssues : response },
-                        function() {
-                            console.log(this.state.gitIssues);
+                            if(this.state.codeCoverage.lineCov < 40 ) {
+                                this.setState( { codeCoverageStatus : { status : RED }});
+                            } else if((this.state.codeCoverage.lineCov > 40) && (this.state.codeCoverage.lineCov < 70)){
+                                this.setState( { codeCoverageStatus : { status : YELLOW }});
+                            } else {
+                                this.setState( { codeCoverageStatus : { status : GREEN }});
+                            }
                         }
                     );
                 }
@@ -400,10 +459,34 @@ class Checklist extends Component {
             .get(mergedPRCountURL)
             .then(
                 res => {
-                    var response = res.data;
-                    this.setState({ mergedPRCount : response },
+                    this.setState({ mergedPRCount : res.data },
                         function() {
-                            console.log(this.state.mergedPRCount);    
+                            if(this.state.mergedPRCount.mprCount > 20) {
+                                this.setState( { mergedPRCountStatus : { status : RED }});
+                            } else {
+                                this.setState( { mergedPRCountStatus : { status : GREEN }});
+                            }
+                        }
+                    );
+                }
+            ).catch(error => {
+                console.log(error);
+            });
+
+            //Dependency Summary
+            axios.create({
+                withCredentials : false,
+            })
+            .get(dependencyURL)
+            .then(
+                res => {
+                    this.setState({ dependencySummary : res.data }, 
+                        function() {
+                            if(this.state.dependencySummary.dependencySummary < 10 ) {
+                                this.setState( { dependenctSummaryStatus : { status : GREEN }});
+                            } else {
+                                this.setState( { dependenctSummaryStatus : { status : RED }});
+                            }
                         }
                     );
                 }
@@ -417,18 +500,39 @@ class Checklist extends Component {
 
     resetState() {
         this.setState({
-            dependencySummary : { dependencySummary : 0, refLink : ""},
+            jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecScanStatus : { status : GREY },
+
+            jiraPerf : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraPerfStatus : { status : GREY },
+
+            jiraCommitment : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraCommitmentStatus : { status : GREY },
+
+            jiraSecCust : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecCustStatus : { status : GREY },
+
+            jiraSecExt : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecExtStatus : { status : GREY },
+
+            jiraSecInt : { totalIssues : 0, openIssues : 0, refLink : "" },
+            jiraSecIntStatus : { status : GREY },
+
+            gitIssues : { L1Issues : 0, L2Issues : 0, L3Issues : 0, refLink :"" },
+            gitIssueL1Status : { status : GREY },
+            gitIssueL2Status : { status : GREY },
+            gitIssueL3Status : { status : GREY },
+
             codeCoverage : { instructionCov : 0, branchCov : 0, complexityCov : 0, 
                 lineCov : 0, methodCov : 0, classCov : 0, refLink : ""
             },
-            gitIssues : { L1Issues : 0, L2Issues : 0, L3Issues : 0, refLink :"" },
+            codeCoverageStatus : { status : GREY },
+
             mergedPRCount : { mprCount : 0, refLink : "" },
-            jiraPerf : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraCommitment : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecCust : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecExt : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecInt : { totalIssues : 0, openIssues : 0, refLink : "" },
+            mergedPRCountStatus : { status : GREY },
+
+            dependencySummary : { dependencySummary : 0, refLink : ""},
+            dependenctSummaryStatus : { status : GREY },
         })
     }
 
@@ -449,7 +553,7 @@ class Checklist extends Component {
 
                     {/* Heading Div */}
                     <div>
-                        <h2><center> Release Readiness Metrics </center></h2>
+                        <h2><center> Release Readiness Metrics ?</center></h2>
                     </div>
 
                     {/* Select Div */}
@@ -507,51 +611,64 @@ class Checklist extends Component {
                             </TableHead>
                         
                             <TableBody>
+                                
+                                { /* JIRA : Security Scan */ }
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell>
+                                        <span style = {this.state.jiraSecScanStatus.status}></span> 
+                                    </TableCell>
                                     <TableCell align = "center">
                                         <Tooltip title = "Shows the security scan results" placement = "top">
                                             <p>Security Scan Reports</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraSecScan.refLink} > 
+                                        <a href = {this.state.jiraSecScan.refLink} target="_blank"> 
                                             {this.state.jiraSecScan.openIssues } open 
                                         </a> / {this.state.jiraSecScan.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
 
+                                { /* JIRA : Performance Analysis */ }
                                 <TableRow>
-                                    <TableCell> <b> RED </b> </TableCell>
+                                    <TableCell>
+                                        <span style = {this.state.jiraPerfStatus.status}></span>
+                                    </TableCell>
                                     <TableCell align = "center">
-                                        <Tooltip title = "Shows the Analysis Report results" placement = "top">
+                                        <Tooltip title = "Shows the Performance Analysis Report results" placement = "top">
                                             <p>Performance Analysis Report</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraPerf.refLink} > 
+                                        <a href = {this.state.jiraPerf.refLink} target="_blank"> 
                                             {this.state.jiraPerf.openIssues } open 
                                         </a> / {this.state.jiraPerf.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
 
+                                { /* JIRA : Commitment */ }
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell> 
+                                        <span style = {this.state.jiraCommitmentStatus.status}></span>
+                                    </TableCell>
                                     <TableCell align = "center">
                                         <Tooltip title = "Shows the Customer Commitments" placement = "top">
                                             <p>Customer Commitments</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraCommitment.refLink} > 
+                                        <a href = {this.state.jiraCommitment.refLink} target="_blank"> 
                                             {this.state.jiraCommitment.openIssues } open 
                                         </a> / {this.state.jiraCommitment.totalIssues } Total
                                         
                                     </TableCell>
                                 </TableRow>
 
+                                { /* JIRA : Security Customer */ }
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell> 
+                                        <span style = {this.state.jiraSecCustStatus.status}> </span> 
+                                    </TableCell>
                                     <TableCell align = "center">
                                         <Tooltip title = "Shows security issues identified by customers" 
                                             placement = "top">
@@ -559,14 +676,17 @@ class Checklist extends Component {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraSecCust.refLink} > 
+                                        <a href = {this.state.jiraSecCust.refLink} target="_blank"> 
                                             {this.state.jiraSecCust.openIssues } open 
                                         </a> / {this.state.jiraSecCust.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
 
+                                { /* JIRA : Security External */ }
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell> 
+                                        <span style = {this.state.jiraSecExtStatus.status}></span>
+                                    </TableCell>
                                     <TableCell align = "center">
                                         <Tooltip title = "Shows security issues identified by external security researchers and OSS users" 
                                             placement = "top">
@@ -574,14 +694,17 @@ class Checklist extends Component {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraSecExt.refLink} > 
+                                        <a href = {this.state.jiraSecExt.refLink} target="_blank"> 
                                             {this.state.jiraSecExt.openIssues } open 
                                         </a> / {this.state.jiraSecExt.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
 
+                                { /* JIRA : Security Internal */ }
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell> 
+                                        <span style = {this.state.jiraSecIntStatus.status}></span>
+                                    </TableCell>
                                     <TableCell align = "center">
                                         <Tooltip title = "Shows security issues identified by internal security testing" 
                                             placement = "top">
@@ -589,116 +712,130 @@ class Checklist extends Component {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell> 
-                                        <a href = {this.state.jiraSecInt.refLink} > 
+                                        <a href = {this.state.jiraSecInt.refLink} target="_blank"> 
                                             {this.state.jiraSecInt.openIssues } open 
                                         </a> / {this.state.jiraSecInt.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
 
-
+                                { /* Git Issue : L1 */ }
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell>
+                                        <span style = {this.state.gitIssueL1Status.status}></span>
+                                    </TableCell>
                                     <TableCell align = "center">
-                                            <p> <b>L1 Issues</b> </p>
+                                            <p> L1 Issues </p>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.gitIssues.refLink }> 
+                                        <a href = { this.state.gitIssues.refLink } target="_blank"> 
                                             { this.state.gitIssues.L1Issues }
                                         </a> 
                                     </TableCell>
                                 </TableRow>
 
+                                { /* Git Issue : L2 */ }
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell> 
+                                        <span style = {this.state.gitIssueL2Status.status}></span>
+                                    </TableCell>
                                     <TableCell align = "center">
-                                            <p> <b>L2 Issues</b> </p>
+                                            <p> L2 Issues </p>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.gitIssues.refLink }> 
+                                        <a href = { this.state.gitIssues.refLink } target="_blank"> 
                                             { this.state.gitIssues.L2Issues } 
                                         </a>
                                     </TableCell>
                                 </TableRow>
 
+                                { /* Git Issue : L3 */ }
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell> 
+                                        <span style = {this.state.gitIssueL3Status.status}></span>
+                                    </TableCell>
                                     <TableCell align = "center">
-                                            <p> <b>L3 Issues</b> </p>
+                                            <p> L3 Issues </p>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.gitIssues.refLink }> 
+                                        <a href = { this.state.gitIssues.refLink } target="_blank"> 
                                             { this.state.gitIssues.L3Issues }
                                         </a>
                                     </TableCell>
                                 </TableRow>
 
+                                { /* Code Coverage */}
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell>
+                                        <span style = {this.state.codeCoverageStatus.status}></span>    
+                                    </TableCell>
                                     <TableCell align = "center">
-                                        <p><b>Code coverage</b></p>
+                                        <p>Code coverage</p>
                                     </TableCell>
                                     <TableCell>
                                         <ul>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } >
+                                                <a href = { this.state.codeCoverage.refLink } target="_blank">
                                                     { this.state.codeCoverage.instructionCov }
                                                 </a> % : Instruction coverage
                                             </li>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } >
+                                                <a href = { this.state.codeCoverage.refLink } target="_blank">
                                                     { this.state.codeCoverage.complexityCov }
                                                 </a> % : Complexity coverage
                                             </li>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } >
+                                                <a href = { this.state.codeCoverage.refLink } target="_blank" >
                                                     { this.state.codeCoverage.lineCov }
                                                 </a> % : Line coverage
                                             </li>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } >
+                                                <a href = { this.state.codeCoverage.refLink } target="_blank" >
                                                     { this.state.codeCoverage.methodCov }
                                                 </a> % : Method coverage
                                             </li>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink }>
+                                                <a href = { this.state.codeCoverage.refLink } target="_blank">
                                                     { this.state.codeCoverage.classCov }
                                                 </a> % : Class coverage 
                                             </li>
-
                                         </ul>
-                                        
-                                    
                                     </TableCell>
                                 </TableRow>
 
+                                { /* Merged PR count Status */}
                                 <TableRow>
-                                    <TableCell> <b> GREEN </b> </TableCell>
+                                    <TableCell> 
+                                        <span style = {this.state.mergedPRCountStatus.status}></span>
+                                    </TableCell>
                                     <TableCell align = "center">
-                                            <p><b>Merged PRs with pending Doc tasks</b></p>
+                                            <p>Merged PRs with pending Doc tasks</p>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.mergedPRCount.refLink }>
+                                        <a href = { this.state.mergedPRCount.refLink } target="_blank">
                                             { this.state.mergedPRCount.mprCount }
                                         </a> 
                                     </TableCell>
                                 </TableRow>
 
+                                { /* Dependency Summary */}
                                 <TableRow>
-                                    <TableCell>
-                                        
+                                    <TableCell> 
+                                        <span style = {this.state.dependenctSummaryStatus.status}></span> 
                                     </TableCell>
                                     <TableCell align = "center">
-                                            <p><b>Dependancies where the next version available is smaller than a patch</b></p>
+                                            <p>Dependancies where the next version available is smaller than a patch</p>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.dependencySummary.refLink }>
+                                        <a href = { this.state.dependencySummary.refLink } target="_blank">
                                             { this.state.dependencySummary.dependencySummary }
                                         </a> 
                                     </TableCell>
                                 </TableRow>
+                            
                             </TableBody>
                         </Table>
                     </div>
+                
                 </div>
             </MuiThemeProvider>
         );
