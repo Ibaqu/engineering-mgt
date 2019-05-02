@@ -35,6 +35,9 @@ import AbstractSelect from './AbstractSelect';
 import './DependencyDashboard.css';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
+import { cpus } from 'os';
+import { timingSafeEqual } from 'crypto';
+import { throws } from 'assert';
 const hostUrl = "https://" + window.location.host + window.contextPath + "/apis/dependency-data";
 
 const darkTheme = createMuiTheme({
@@ -77,9 +80,13 @@ class DependencyDashboard extends Widget {
             width: this.props.glContainer.width,
             height: this.props.glContainer.height,
             selectedProduct: null,
+            selectedOrg : null,
             orgOpen: false,
             repoOpen: false,
             productOpen: false,
+            
+            globalProduct : super.getGlobalState('product'),
+            globalOrg : super.getGlobalState('org')
         };
 
         this.styles = {
@@ -120,19 +127,37 @@ class DependencyDashboard extends Widget {
                     acc[data.orgName][data.productName][data.repoName] = data.repoName;
                     return acc;
                 }, {});
+                
                 const dependencyDataInit = Object.assign(productData);
                 const dependencyData = response[0].data.reduce((acc, data) => {
                     dependencyDataInit[data.orgName][data.productName][data.repoName] = data;
                     return acc;
                 }, dependencyDataInit);
+                
                 this.setState({
                     dependencyData: dependencyData,
                     productData: productData,
+
                 });
+
+                //Check if the states are empty. If empty dont assign it to selectedOrg and selectedProduct
+                if((this.isEmpty(this.state.globalOrg))|| this.isEmpty(this.state.globalProduct)) {
+                    console.log("Empty Global state");
+                } else {
+                    console.log("Global state recieved. Setting selectedOrg and selectedProduct");           
+                    this.setState({
+                        selectedProduct : this.state.globalProduct,
+                        selectedOrg : this.state.globalOrg
+                    },this.calculateSelectedProductSummery)
+                }
             })
             .catch(error => {
                 console.error(error);
             })
+    }
+
+    isEmpty(obj) {
+        return Object.keys(obj).length === 0;
     }
 
     handleChange(event, type) {
