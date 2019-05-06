@@ -1,9 +1,7 @@
 import React, { Component, Children, version } from 'react';
-
 import { MuiThemeProvider, withStyles} from '@material-ui/core/styles';
-
 import { FormControl, InputLabel, Select, MenuItem, FilledInput, Tooltip, createMuiTheme } from '@material-ui/core';
-
+import Widget from '@wso2-dashboards/widget';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -80,7 +78,7 @@ const GREY = {
     display: 'inline-block'
 }
 
-class Checklist extends Component {
+class Checklist extends Widget {
     
     constructor(props) {
         super(props);
@@ -133,15 +131,10 @@ class Checklist extends Component {
         };
 
         this.handleChange_ProductVersion = event => {
-            console.log("Handling change");
             this.setState ({ [event.target.name] : event.target.value });
             this.setState ({ 
                 selected_ProductVersion : event.target.value
-            },function () {
-                console.log("STATE :: Selected Version Title : " + this.state.selected_ProductVersion.versionTitle);
-                console.log("STATE :: Selected Version Number : " + this.state.selected_ProductVersion.versionNumber);
             });
-            
         }
     }
 
@@ -162,7 +155,7 @@ class Checklist extends Component {
                 });
 
                 this.setState({productNameList : productsFromApi }, function () {
-                    console.log("State :: Product Name list : ");
+                    console.log("Product Name list : ");
                     console.log(this.state.productNameList)
                 });
             })
@@ -174,8 +167,6 @@ class Checklist extends Component {
 
     componentDidUpdate(prevProps, prevState) {
         if(this.state.selected_ProductName !== prevState.selected_ProductName) {
-            console.log("Product Name has changed") 
-            console.log("Resetting metrics");
             this.resetState();
            
             let versionURL = hostUrl + '/versions/' + this.state.selected_ProductName;
@@ -199,7 +190,7 @@ class Checklist extends Component {
                             versionNumber : versionsFromApi.versionNumber
                         }))
                     }, function () {
-                        console.log("State :: Product Version list : ");
+                        console.log("Product Version list : ");
                         console.log(this.state.productVersionList);
                     })
                 }
@@ -218,181 +209,196 @@ class Checklist extends Component {
             let gitIssuesURL = hostUrl + '/gitIssues/' + this.state.selected_ProductName;
             //let gitIssuesURL = "https://www.mocky.io/v2/5cc01e0a310000580b036090";
             gitIssuesURL = appendQuery(gitIssuesURL, infoVersion);
-            console.log("Git Issues URL :" + gitIssuesURL);
 
             let codeCoverageURL = hostUrl + '/codeCoverage/' + this.state.selected_ProductName;
             //let codeCoverageURL = "https://www.mocky.io/v2/5cc0121a3100009f0a036018";
-            console.log("Code Coverage URL :" + codeCoverageURL);
             
             let mergedPRCountURL = hostUrl + '/mprCount/' + this.state.selected_ProductName;
             //let mergedPRCountURL = "https://www.mocky.io/v2/5cc012933100007e0f036024"    
             mergedPRCountURL = appendQuery(mergedPRCountURL, infoTitle);
-            console.log("Merged PR URL :" + mergedPRCountURL);
 
             let dependencyURL = hostUrl + '/dependency/' + this.state.selected_ProductName;
             //let dependencyURL = "https://www.mocky.io/v2/5cc011df310000170e036016";
-            console.log("Dependency URL :" + dependencyURL);
 
-            let jiraIssueTypes = ['perf-report', 'sec-scan', 'commitment', 'sec-cust', 'sec-ext', 'sec-int'];
+            var jiraTypesArray = ['sec-scan', 'perf-report', 'commitment', 'sec-cust', 'sec-ext', 'sec-int'];
             
-            //Jira issue : Security Scan
-            console.log(" JIRA Security Scan ");
-            let infoSecScan = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'sec-scan' }
-            let jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
-            //let jiraURL = "https://www.mocky.io/v2/5cc01cbb310000bf0b036084";
-            jiraURL = appendQuery(jiraURL, infoSecScan);
+            console.log("Displaying all Jira Issue types");
 
-            axios.create({
-                withCredentials : false,
-            })
-            .get(jiraURL)
-            .then(
-                res => {
-                    this.setState({ jiraSecScan : res.data }, 
-                        function() {
-                            if(this.state.jiraSecScan.openIssues > 0) {
-                                this.setState({ jiraSecScanStatus : { status : RED } }); 
-                            } else {
-                                this.setState({ jiraSecScanStatus : { status : GREEN } });
-                            }
-                        }
-                    );
+            var jiraTypesArrayLength = jiraTypesArray.length;
+
+            for(var i=0; i < jiraTypesArrayLength; i++) {
+                console.log(jiraTypesArray[i]);
+                let Query = { 
+                    version : this.state.selected_ProductVersion.versionTitle , issueType : jiraTypesArray[i] 
                 }
-            ).catch(error => {
-                console.log(error);
-            });
+                console.log(Query);
 
-            //Jira issue : Performance Report
-            console.log(" JIRA Performance Report ");
-            let infoPerf = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'perf-report' }
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
-            //jiraURL = "https://www.mocky.io/v2/5cc01cee3100007d0e036086";
-            jiraURL = appendQuery(jiraURL, infoPerf);
+                let jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
+                jiraURL = appendQuery(jiraURL, Query);
 
-            axios.create({
-                withCredentials : false,
-            })
-            .get(jiraURL)
-            .then(
-                res => {
-                    //var response = res.data;
-                    this.setState({ jiraPerf : res.data }, 
-                        function() {
-                            if(this.state.jiraPerf.openIssues > 0) {
-                                this.setState({ jiraPerfStatus : { status : RED } });
-                            } else {
-                                this.setState({ jiraPerfStatus : { status : GREEN } });
+                console.log(jiraURL);
+
+                switch (jiraTypesArray[i]) {
+                    case "perf-report" : {
+                        console.log("Security Scan hit");
+
+                        axios.create({
+                            withCredentials : false,
+                        })
+                        .get(jiraURL)
+                        .then(
+                            res => {
+                                this.setState({ jiraSecScan : res.data }, 
+                                    function() {
+                                        console.log(this.state.jiraSecScan)
+                                        if(this.state.jiraSecScan.openIssues > 0) {
+                                            this.setState({ jiraSecScanStatus : { status : RED } }); 
+                                        } else {
+                                            this.setState({ jiraSecScanStatus : { status : GREEN } });
+                                        }
+                                    }
+                                );
                             }
-                        }
-                    );
-                }
-            ).catch(error => {
-                console.log(error);
-            });
+                        ).catch(error => {
+                            console.log(error);
+                        });
+                        break;
+                    }
 
-            //Jira issue : Customer Commitment
-            let infoCommitment = {version : this.state.selected_ProductVersion.versionTitle, issueType : 'commitment'}
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
-            //jiraURL = "https://www.mocky.io/v2/5cc01d663100007d0e03608a";
-            jiraURL = appendQuery(jiraURL, infoCommitment);
+                    case "sec-scan" : {
+                        console.log("Performance report hit");
 
-            axios.create({
-                withCredentials : false,
-            })
-            .get(jiraURL)
-            .then(
-                res => {
-                    this.setState({ jiraCommitment : res.data }, 
-                        function() {
-                            if(this.state.jiraCommitment.openIssues > 0) {
-                                this.setState({ jiraCommitmentStatus : { status : RED }});
-                            } else {
-                                this.setState({ jiraCommitmentStatus : { status : GREEN }})
+                        axios.create({
+                            withCredentials : false,
+                        })
+                        .get(jiraURL)
+                        .then(
+                            res => {
+                                this.setState({ jiraPerf : res.data }, 
+                                    function() {
+                                        console.log(this.state.jiraPerf)
+                                        if(this.state.jiraPerf.openIssues > 0) {
+                                            this.setState({ jiraPerfStatus : { status : RED } });
+                                        } else {
+                                            this.setState({ jiraPerfStatus : { status : GREEN } });
+                                        }
+                                    }
+                                );
                             }
-                        }
-                    );
-                }
-            ).catch(error => {
-                console.log(error);
-            });
+                        ).catch(error => {
+                            console.log(error);
+                        });
+            
 
-            //Jira issue : Security customer
-            let infoSecCust = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'sec-cust' }
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
-            //jiraURL = "https://www.mocky.io/v2/5cc01cee3100007d0e036086";
-            jiraURL = appendQuery(jiraURL, infoSecCust);
+                        break;
+                    }
 
-            axios.create({
-                withCredentials : false,
-            })
-            .get(jiraURL)
-            .then(
-                res => {
-                    this.setState({ jiraSecCust : res.data }, 
-                        function() {
-                            if(this.state.jiraSecCust.openIssues > 0) {
-                                this.setState( { jiraSecCustStatus : { status : RED }});
-                            } else {
-                                this.setState( { jiraSecCustStatus : { status : GREEN }});
+                    case "commitment" : {
+                        console.log("Customer commitment hit");
+
+                        axios.create({
+                            withCredentials : false,
+                        })
+                        .get(jiraURL)
+                        .then(
+                            res => {
+                                this.setState({ jiraCommitment : res.data }, 
+                                    function() {
+                                        console.log(this.state.jiraCommitment);
+                                        if(this.state.jiraCommitment.openIssues > 0) {
+                                            this.setState({ jiraCommitmentStatus : { status : RED }});
+                                        } else {
+                                            this.setState({ jiraCommitmentStatus : { status : GREEN }})
+                                        }
+                                    }
+                                );
                             }
-                        }
-                    );
-                }
-            ).catch(error => {
-                console.log(error);
-            });
+                        ).catch(error => {
+                            console.log(error);
+                        });
 
-            //Jira issue : Security External
-            let infoSecExt = { version : this.state.selected_ProductVersion.versionTitle, issueType : 'sec-ext' }
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
-            //jiraURL = "https://www.mocky.io/v2/5cc2d6b33300002b007e54bc";
-            jiraURL = appendQuery(jiraURL, infoSecExt);
+                        break;
+                    }
 
-            axios.create({
-                withCredentials : false,
-            })
-            .get(jiraURL)
-            .then(
-                res => {
-                    this.setState({ jiraSecExt : res.data}, 
-                        function() {
-                            if(this.state.jiraSecExt.openIssues > 0) {
-                                this.setState( { jiraSecExtStatus : { status : RED }});
-                            } else {
-                                this.setState( { jiraSecExtStatus : { status : GREEN }});
+                    case "sec-cust" : {
+                        console.log("Security Issues by customers hit");
+
+                        axios.create({
+                            withCredentials : false,
+                        })
+                        .get(jiraURL)
+                        .then(
+                            res => {
+                                this.setState({ jiraSecCust : res.data }, 
+                                    function() {
+                                        if(this.state.jiraSecCust.openIssues > 0) {
+                                            this.setState( { jiraSecCustStatus : { status : RED }});
+                                        } else {
+                                            this.setState( { jiraSecCustStatus : { status : GREEN }});
+                                        }
+                                    }
+                                );
                             }
-                        }
-                    );
-                }
-            ).catch(error => {
-                console.log(error);
-            });
+                        ).catch(error => {
+                            console.log(error);
+                        });
+            
+                        break;
+                    }
 
-            //Jira issue : Security Internal
-            let infoSecInt = {  version : this.state.selected_ProductVersion.versionTitle, issueType : 'sec-int' }
-            jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
-            //jiraURL = "https://www.mocky.io/v2/5cc01d663100007d0e03608a";
-            jiraURL = appendQuery(jiraURL, infoSecInt);
+                    case "sec-ext" : {
+                        console.log("Security issues by external testing hit");
 
-            axios.create({
-                withCredentials : false,
-            })
-            .get(jiraURL)
-            .then(
-                res => {
-                    this.setState({ jiraSecInt : res.data}, 
-                        function() {
-                            if(this.state.jiraSecInt.openIssues > 0) {
-                                this.setState( { jiraSecIntStatus : { status : RED }});
-                            } else {
-                                this.setState( { jiraSecIntStatus : { status : GREEN }});
+                        axios.create({
+                            withCredentials : false,
+                        })
+                        .get(jiraURL)
+                        .then(
+                            res => {
+                                this.setState({ jiraSecExt : res.data}, 
+                                    function() {
+                                        if(this.state.jiraSecExt.openIssues > 0) {
+                                            this.setState( { jiraSecExtStatus : { status : RED }});
+                                        } else {
+                                            this.setState( { jiraSecExtStatus : { status : GREEN }});
+                                        }
+                                    }
+                                );
                             }
-                        }
-                    );
+                        ).catch(error => {
+                            console.log(error);
+                        });
+                        break;
+                    }
+
+                    case "sec-int" : {
+                        console.log("Security issues by internal testing hit");
+
+                        axios.create({
+                            withCredentials : false,
+                        })
+                        .get(jiraURL)
+                        .then(
+                            res => {
+                                this.setState({ jiraSecInt : res.data}, 
+                                    function() {
+                                        if(this.state.jiraSecInt.openIssues > 0) {
+                                            this.setState( { jiraSecIntStatus : { status : RED }});
+                                        } else {
+                                            this.setState( { jiraSecIntStatus : { status : GREEN }});
+                                        }
+                                    }
+                                );
+                            }
+                        ).catch(error => {
+                            console.log(error);
+                        });
+                        break;
+                    }
+
                 }
-            ).catch(error => {
-                console.log(error);
-            });
+
+            }
       
             //Git issues 
             axios.create({
@@ -499,7 +505,7 @@ class Checklist extends Component {
     }
 
     resetState() {
-        this.setState({
+        this.setState({ 
             jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" },
             jiraSecScanStatus : { status : GREY },
 
@@ -553,7 +559,7 @@ class Checklist extends Component {
 
                     {/* Heading Div */}
                     <div>
-                        <h2><center> Release Readiness Metrics ?</center></h2>
+                        <h2><center> Release Readiness Metrics </center></h2>
                     </div>
 
                     {/* Select Div */}
@@ -605,9 +611,11 @@ class Checklist extends Component {
                             </colgroup>
                         
                             <TableHead>
-                                <TableCell> <h3> Status </h3> </TableCell>
-                                <TableCell align = "center"> <h3> Metrics </h3> </TableCell>
-                                <TableCell> <h3> Progress </h3> </TableCell>
+                                <TableCell style = {{ color : '#33b5e5'}}> <h3> Status </h3> </TableCell>
+                                <TableCell style = {{ color : '#33b5e5'}} align = "center"> 
+                                    <h3> Metrics </h3> 
+                                </TableCell>
+                                <TableCell style = {{ color : '#33b5e5'}}> <h3> Progress </h3> </TableCell>
                             </TableHead>
                         
                             <TableBody>
