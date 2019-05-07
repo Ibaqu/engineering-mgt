@@ -89,38 +89,38 @@ class Checklist extends Widget {
             productVersionList: [],
 
             jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" }, 
-            jiraSecScanStatus : { status : GREY },
+            jiraSecScanStatus : { status : GREY, desc : "" },
 
             jiraPerf : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraPerfStatus : { status : GREY },
+            jiraPerfStatus : { status : GREY, desc : "" },
 
             jiraCommitment : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraCommitmentStatus : { status : GREY },
+            jiraCommitmentStatus : { status : GREY, desc : "" },
 
             jiraSecCust : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecCustStatus : { status : GREY },
+            jiraSecCustStatus : { status : GREY, desc : "" },
 
             jiraSecExt : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecExtStatus : { status : GREY },
+            jiraSecExtStatus : { status : GREY, desc : "" },
 
             jiraSecInt : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecIntStatus : { status : GREY },
+            jiraSecIntStatus : { status : GREY, desc : "" },
 
             gitIssues : { L1Issues : 0, L2Issues : 0, L3Issues : 0, refLink :"" },
-            gitIssueL1Status : { status : GREY },
-            gitIssueL2Status : { status : GREY },
-            gitIssueL3Status : { status : GREY },
+            gitIssueL1Status : { status : GREY, desc : "" },
+            gitIssueL2Status : { status : GREY, desc : "" },
+            gitIssueL3Status : { status : GREY, desc : "" },
 
             codeCoverage : { instructionCov : 0, branchCov : 0, complexityCov : 0, 
                 lineCov : 0, methodCov : 0, classCov : 0, refLink : ""
             },
-            codeCoverageStatus : { status : GREY },
+            codeCoverageStatus : { status : GREY, desc : "" },
 
             mergedPRCount : { mprCount : 0, refLink : "" },
-            mergedPRCountStatus : { status : GREY },
+            mergedPRCountStatus : { status : GREY, desc : "" },
             
-            dependencySummary : { dependencySummary : 0, refLink : ""},
-            dependenctSummaryStatus : { status : GREY },
+            dependencySummary : { dependencySummary : 0, refLink : "" },
+            dependencySummaryStatus : { status : GREY, desc : "" },
         };
 
         this.handleChange_ProductName = event => {
@@ -221,17 +221,11 @@ class Checklist extends Widget {
             //let dependencyURL = "https://www.mocky.io/v2/5cc011df310000170e036016";
 
             var jiraTypesArray = ['sec-scan', 'perf-report', 'commitment', 'sec-cust', 'sec-ext', 'sec-int'];
-            
-            console.log("Displaying all Jira Issue types");
 
-            var jiraTypesArrayLength = jiraTypesArray.length;
-
-            for(var i=0; i < jiraTypesArrayLength; i++) {
-                console.log(jiraTypesArray[i]);
+            for(var i=0; i < jiraTypesArray.length; i++) {
                 let Query = { 
                     version : this.state.selected_ProductVersion.versionTitle , issueType : jiraTypesArray[i] 
                 }
-                console.log(Query);
 
                 let jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
                 jiraURL = appendQuery(jiraURL, Query);
@@ -239,7 +233,7 @@ class Checklist extends Widget {
                 console.log(jiraURL);
 
                 switch (jiraTypesArray[i]) {
-                    case "perf-report" : {
+                    case "sec-scan" : {
                         console.log("Security Scan hit");
 
                         axios.create({
@@ -250,11 +244,20 @@ class Checklist extends Widget {
                             res => {
                                 this.setState({ jiraSecScan : res.data }, 
                                     function() {
-                                        console.log(this.state.jiraSecScan)
                                         if(this.state.jiraSecScan.openIssues > 0) {
-                                            this.setState({ jiraSecScanStatus : { status : RED } }); 
+                                            this.setState({ 
+                                                jiraSecScanStatus : { 
+                                                    status : RED,
+                                                    desc : "RED : Security Scan reports are present" 
+                                                } 
+                                            }); 
                                         } else {
-                                            this.setState({ jiraSecScanStatus : { status : GREEN } });
+                                            this.setState({ 
+                                                jiraSecScanStatus : { 
+                                                    status : GREEN,
+                                                    desc : "GREEN : No Security Scan reports are present"
+                                                } 
+                                            });
                                         }
                                     }
                                 );
@@ -265,7 +268,7 @@ class Checklist extends Widget {
                         break;
                     }
 
-                    case "sec-scan" : {
+                    case "perf-report" : {
                         console.log("Performance report hit");
 
                         axios.create({
@@ -276,11 +279,20 @@ class Checklist extends Widget {
                             res => {
                                 this.setState({ jiraPerf : res.data }, 
                                     function() {
-                                        console.log(this.state.jiraPerf)
                                         if(this.state.jiraPerf.openIssues > 0) {
-                                            this.setState({ jiraPerfStatus : { status : RED } });
+                                            this.setState({ 
+                                                jiraPerfStatus : { 
+                                                    status : RED,
+                                                    desc : "RED : Performance Analysis Reports are present"
+                                                } 
+                                            });
                                         } else {
-                                            this.setState({ jiraPerfStatus : { status : GREEN } });
+                                            this.setState({ 
+                                                jiraPerfStatus : { 
+                                                    status : GREEN,
+                                                    desc : "GREEN : No Performance Analysis Reports present"
+                                                } 
+                                            });
                                         }
                                     }
                                 );
@@ -304,11 +316,20 @@ class Checklist extends Widget {
                             res => {
                                 this.setState({ jiraCommitment : res.data }, 
                                     function() {
-                                        console.log(this.state.jiraCommitment);
                                         if(this.state.jiraCommitment.openIssues > 0) {
-                                            this.setState({ jiraCommitmentStatus : { status : RED }});
+                                            this.setState({ 
+                                                jiraCommitmentStatus : { 
+                                                    status : RED,
+                                                    desc : "RED : Customer Commitments are present"
+                                                }
+                                            });
                                         } else {
-                                            this.setState({ jiraCommitmentStatus : { status : GREEN }})
+                                            this.setState({ 
+                                                jiraCommitmentStatus : { 
+                                                    status : GREEN,
+                                                    desc : "GREEN : No Customer Commitments are present"
+                                                }
+                                            });
                                         }
                                     }
                                 );
@@ -332,9 +353,19 @@ class Checklist extends Widget {
                                 this.setState({ jiraSecCust : res.data }, 
                                     function() {
                                         if(this.state.jiraSecCust.openIssues > 0) {
-                                            this.setState( { jiraSecCustStatus : { status : RED }});
+                                            this.setState({ 
+                                                jiraSecCustStatus : { 
+                                                    status : RED,
+                                                    desc : "RED : Security issues identified by the customer are present" 
+                                                }
+                                            });
                                         } else {
-                                            this.setState( { jiraSecCustStatus : { status : GREEN }});
+                                            this.setState({ 
+                                                jiraSecCustStatus : { 
+                                                    status : GREEN,
+                                                    desc : "GREEN : No Security issues identified by the customer"
+                                                }
+                                            });
                                         }
                                     }
                                 );
@@ -358,9 +389,19 @@ class Checklist extends Widget {
                                 this.setState({ jiraSecExt : res.data}, 
                                     function() {
                                         if(this.state.jiraSecExt.openIssues > 0) {
-                                            this.setState( { jiraSecExtStatus : { status : RED }});
+                                            this.setState({ 
+                                                jiraSecExtStatus : { 
+                                                    status : RED,
+                                                    desc : "RED : Security issues by external testing are present" 
+                                                }
+                                            });
                                         } else {
-                                            this.setState( { jiraSecExtStatus : { status : GREEN }});
+                                            this.setState({ 
+                                                jiraSecExtStatus : { 
+                                                    status : GREEN,
+                                                    desc : "GREEN : No Security issues identified by external testing" 
+                                                }
+                                            });
                                         }
                                     }
                                 );
@@ -372,8 +413,6 @@ class Checklist extends Widget {
                     }
 
                     case "sec-int" : {
-                        console.log("Security issues by internal testing hit");
-
                         axios.create({
                             withCredentials : false,
                         })
@@ -383,9 +422,18 @@ class Checklist extends Widget {
                                 this.setState({ jiraSecInt : res.data}, 
                                     function() {
                                         if(this.state.jiraSecInt.openIssues > 0) {
-                                            this.setState( { jiraSecIntStatus : { status : RED }});
+                                            this.setState({ 
+                                                jiraSecIntStatus : { 
+                                                    status : RED,
+                                                    desc : "RED : Security issues by internal testing are present"
+                                                }
+                                            });
                                         } else {
-                                            this.setState( { jiraSecIntStatus : { status : GREEN }});
+                                            this.setState({ 
+                                                jiraSecIntStatus : { 
+                                                    status : GREEN,
+                                                    desc : "GREEN : No Security issues identified by internal testing"
+                                                }});
                                         }
                                     }
                                 );
@@ -410,23 +458,56 @@ class Checklist extends Widget {
                     this.setState( { gitIssues : res.data},
                         function() {
                             if(this.state.gitIssues.L1Issues > 0) {
-                                this.setState( { gitIssueL1Status : { status : RED }});
+                                this.setState({ 
+                                    gitIssueL1Status : { 
+                                        status : RED,
+                                        desc : "RED : Number of L1 issues is greater than 0"
+                                    }
+                                });
                             } else {
-                                this.setState( { gitIssueL1Status : { status : GREEN }});
+                                this.setState({ 
+                                    gitIssueL1Status : { 
+                                        status : GREEN,
+                                        desc : "GREEN : No L1 issues open"
+                                        
+                                    }
+                                });
                             }
 
                             if(this.state.gitIssues.L2Issues > 0 && this.state.gitIssues.L2Issues <= 5) {
-                                this.setState( { gitIssueL2Status : { status : YELLOW }});
+                                this.setState({ 
+                                    gitIssueL2Status : { 
+                                        status : YELLOW,
+                                        desc : "YELLOW : Number of L2 issues is greater than 0 and less than or equal to 5"
+                                    }
+                                });
                             } else if(this.state.gitIssues.L2Issues > 5) {
-                                this.setState( { gitIssueL2Status : { status : RED }});
+                                this.setState({ 
+                                    gitIssueL2Status : { 
+                                        status : RED,
+                                        desc : "RED : Number of L2 issues is greater than 5"
+                                    }});
                             } else {
-                                this.setState( { gitIssueL2Status : { status : GREEN }});
+                                this.setState({ 
+                                    gitIssueL2Status : { 
+                                        status : GREEN,
+                                        desc : "GREEN : No L2 issues open"
+                                    }});
                             }
 
                             if(this.state.gitIssues.L3Issues > 50) {
-                                this.setState( { gitIssueL3Status : { status : YELLOW }});
+                                this.setState({ 
+                                    gitIssueL3Status : { 
+                                        status : YELLOW, 
+                                        desc : "YELLOW : No of L3 issues is greater than 50"
+                                    }
+                                });
                             } else {
-                                this.setState( { gitIssueL3Status : { status : GREEN }})
+                                this.setState({ 
+                                    gitIssueL3Status : { 
+                                        status : GREEN, 
+                                        desc : "GREEN : No of L3 issues is less than or equal to 50"
+                                    }})
                             }
                         }
                     );
@@ -444,12 +525,27 @@ class Checklist extends Widget {
                 res => {
                     this.setState({codeCoverage : res.data },
                         function() {
-                            if(this.state.codeCoverage.lineCov < 40 ) {
-                                this.setState( { codeCoverageStatus : { status : RED }});
+                            if(this.state.codeCoverage.lineCov <= 40 ) {
+                                this.setState({ 
+                                    codeCoverageStatus : { 
+                                        status : RED,
+                                        desc : "RED : Line coverage is less than or equal to 40%"
+                                    }
+                                });
                             } else if((this.state.codeCoverage.lineCov > 40) && (this.state.codeCoverage.lineCov < 70)){
-                                this.setState( { codeCoverageStatus : { status : YELLOW }});
+                                this.setState({ 
+                                    codeCoverageStatus : { 
+                                        status : YELLOW,
+                                        desc : "YELLOW : Line coverage is between 40% and 70%" 
+                                    }
+                                });
                             } else {
-                                this.setState( { codeCoverageStatus : { status : GREEN }});
+                                this.setState({ 
+                                    codeCoverageStatus : { 
+                                        status : GREEN,
+                                        desc : "GREEN : Line coverage is greater than 70%"
+                                    }
+                                });
                             }
                         }
                     );
@@ -468,9 +564,19 @@ class Checklist extends Widget {
                     this.setState({ mergedPRCount : res.data },
                         function() {
                             if(this.state.mergedPRCount.mprCount > 20) {
-                                this.setState( { mergedPRCountStatus : { status : RED }});
+                                this.setState({ 
+                                    mergedPRCountStatus : { 
+                                        status : RED,
+                                        desc : "RED : Number of PRs with pending doc tasks is greater than 20" 
+                                    }
+                                });
                             } else {
-                                this.setState( { mergedPRCountStatus : { status : GREEN }});
+                                this.setState({ 
+                                    mergedPRCountStatus : { 
+                                        status : GREEN,
+                                        desc : "GREEN : Number of PRs with pending doc tasks is less than or equal to 20"
+                                    }
+                                });
                             }
                         }
                     );
@@ -489,9 +595,19 @@ class Checklist extends Widget {
                     this.setState({ dependencySummary : res.data }, 
                         function() {
                             if(this.state.dependencySummary.dependencySummary < 10 ) {
-                                this.setState( { dependenctSummaryStatus : { status : GREEN }});
+                                this.setState({ 
+                                    dependencySummaryStatus : { 
+                                        status : GREEN, 
+                                        desc : "GREEN : Number of Dependencies is less than or equal to 10" 
+                                    }    
+                                });
                             } else {
-                                this.setState( { dependenctSummaryStatus : { status : RED }});
+                                this.setState({ 
+                                    dependencySummaryStatus : { 
+                                        status : RED,
+                                        desc : "RED : Number of Dependencies is greater than 10"
+                                    }
+                                });
                             }
                         }
                     );
@@ -507,38 +623,38 @@ class Checklist extends Widget {
     resetState() {
         this.setState({ 
             jiraSecScan : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecScanStatus : { status : GREY },
+            jiraSecScanStatus : { status : GREY, desc : "" },
 
             jiraPerf : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraPerfStatus : { status : GREY },
+            jiraPerfStatus : { status : GREY, desc : "" },
 
             jiraCommitment : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraCommitmentStatus : { status : GREY },
+            jiraCommitmentStatus : { status : GREY, desc : "" },
 
             jiraSecCust : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecCustStatus : { status : GREY },
+            jiraSecCustStatus : { status : GREY, desc : "" },
 
             jiraSecExt : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecExtStatus : { status : GREY },
+            jiraSecExtStatus : { status : GREY, desc : "" },
 
             jiraSecInt : { totalIssues : 0, openIssues : 0, refLink : "" },
-            jiraSecIntStatus : { status : GREY },
+            jiraSecIntStatus : { status : GREY, desc : "" },
 
             gitIssues : { L1Issues : 0, L2Issues : 0, L3Issues : 0, refLink :"" },
-            gitIssueL1Status : { status : GREY },
-            gitIssueL2Status : { status : GREY },
-            gitIssueL3Status : { status : GREY },
+            gitIssueL1Status : { status : GREY, desc : "" },
+            gitIssueL2Status : { status : GREY, desc : "" },
+            gitIssueL3Status : { status : GREY, desc : "" },
 
             codeCoverage : { instructionCov : 0, branchCov : 0, complexityCov : 0, 
                 lineCov : 0, methodCov : 0, classCov : 0, refLink : ""
             },
-            codeCoverageStatus : { status : GREY },
+            codeCoverageStatus : { status : GREY, desc : "" },
 
             mergedPRCount : { mprCount : 0, refLink : "" },
-            mergedPRCountStatus : { status : GREY },
+            mergedPRCountStatus : { status : GREY, desc : "" },
 
             dependencySummary : { dependencySummary : 0, refLink : ""},
-            dependenctSummaryStatus : { status : GREY },
+            dependencySummaryStatus : { status : GREY , desc : ""},
         })
     }
 
@@ -622,12 +738,18 @@ class Checklist extends Widget {
                                 
                                 { /* JIRA : Security Scan */ }
                                 <TableRow>
-                                    <TableCell>
-                                        <span style = {this.state.jiraSecScanStatus.status}></span> 
+                                    <TableCell> 
+                                        <Tooltip 
+                                            title = {this.state.jiraSecScanStatus.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.jiraSecScanStatus.status}></span> 
+                                        </Tooltip>    
                                     </TableCell>
                                     <TableCell align = "center">
-                                        <Tooltip title = "Shows the security scan results" placement = "top">
-                                            <p>Security Scan Reports</p>
+                                        <Tooltip 
+                                            title = "Shows the Security Scan results" 
+                                            placement = "top">
+                                                <p>Security Scan Reports</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
@@ -640,11 +762,17 @@ class Checklist extends Widget {
                                 { /* JIRA : Performance Analysis */ }
                                 <TableRow>
                                     <TableCell>
-                                        <span style = {this.state.jiraPerfStatus.status}></span>
+                                        <Tooltip 
+                                            title = {this.state.jiraPerfStatus.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.jiraPerfStatus.status}></span>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell align = "center">
-                                        <Tooltip title = "Shows the Performance Analysis Report results" placement = "top">
-                                            <p>Performance Analysis Report</p>
+                                        <Tooltip 
+                                            title = "Shows the Performance Analysis Report results" 
+                                            placement = "top">
+                                                <p>Performance Analysis Report</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
@@ -657,7 +785,11 @@ class Checklist extends Widget {
                                 { /* JIRA : Commitment */ }
                                 <TableRow>
                                     <TableCell> 
-                                        <span style = {this.state.jiraCommitmentStatus.status}></span>
+                                        <Tooltip 
+                                            title = {this.state.jiraCommitmentStatus.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.jiraCommitmentStatus.status}></span>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell align = "center">
                                         <Tooltip title = "Shows the Customer Commitments" placement = "top">
@@ -674,13 +806,18 @@ class Checklist extends Widget {
 
                                 { /* JIRA : Security Customer */ }
                                 <TableRow>
-                                    <TableCell> 
-                                        <span style = {this.state.jiraSecCustStatus.status}> </span> 
+                                    <TableCell>
+                                        <Tooltip 
+                                            title = {this.state.jiraSecCustStatus.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.jiraSecCustStatus.status}> </span>
+                                        </Tooltip>  
                                     </TableCell>
                                     <TableCell align = "center">
-                                        <Tooltip title = "Shows security issues identified by customers" 
+                                        <Tooltip 
+                                            title = "Shows Security issues identified by Customers" 
                                             placement = "top">
-                                            <p>Security issues by customers</p>
+                                                <p>Security issues by customers</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
@@ -693,12 +830,17 @@ class Checklist extends Widget {
                                 { /* JIRA : Security External */ }
                                 <TableRow>
                                     <TableCell> 
-                                        <span style = {this.state.jiraSecExtStatus.status}></span>
+                                        <Tooltip 
+                                            title = {this.state.jiraSecExtStatus.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.jiraSecExtStatus.status}></span>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell align = "center">
-                                        <Tooltip title = "Shows security issues identified by external security researchers and OSS users" 
+                                        <Tooltip 
+                                            title = "Shows Security issues identified by External security researchers and OSS users" 
                                             placement = "top">
-                                            <p>Security issues by external testing</p>
+                                                <p>Security issues by external testing</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
@@ -710,13 +852,18 @@ class Checklist extends Widget {
 
                                 { /* JIRA : Security Internal */ }
                                 <TableRow>
-                                    <TableCell> 
-                                        <span style = {this.state.jiraSecIntStatus.status}></span>
+                                    <TableCell>
+                                        <Tooltip
+                                            title = {this.state.jiraSecIntStatus.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.jiraSecIntStatus.status}></span>
+                                        </Tooltip> 
                                     </TableCell>
                                     <TableCell align = "center">
-                                        <Tooltip title = "Shows security issues identified by internal security testing" 
+                                        <Tooltip 
+                                            title = "Shows Security issues identified by Internal security testing" 
                                             placement = "top">
-                                            <p>Security issues by internal testing</p>
+                                                <p>Security issues by internal testing</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell> 
@@ -729,10 +876,18 @@ class Checklist extends Widget {
                                 { /* Git Issue : L1 */ }
                                 <TableRow>
                                     <TableCell>
-                                        <span style = {this.state.gitIssueL1Status.status}></span>
+                                        <Tooltip 
+                                            title = {this.state.gitIssueL1Status.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.gitIssueL1Status.status}></span>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell align = "center">
-                                            <p> L1 Issues </p>
+                                        <Tooltip 
+                                            title = "Number of L1 issues" 
+                                            placement = "top">
+                                                <p> L1 Issues </p>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell>
                                         <a href = { this.state.gitIssues.refLink } target="_blank"> 
@@ -744,10 +899,18 @@ class Checklist extends Widget {
                                 { /* Git Issue : L2 */ }
                                 <TableRow>
                                     <TableCell> 
-                                        <span style = {this.state.gitIssueL2Status.status}></span>
+                                        <Tooltip
+                                            title = {this.state.gitIssueL2Status.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.gitIssueL2Status.status}></span>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell align = "center">
-                                            <p> L2 Issues </p>
+                                        <Tooltip 
+                                            title = "Number of L2 issues" 
+                                            placement = "top">
+                                                <p> L2 Issues </p>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell>
                                         <a href = { this.state.gitIssues.refLink } target="_blank"> 
@@ -758,11 +921,19 @@ class Checklist extends Widget {
 
                                 { /* Git Issue : L3 */ }
                                 <TableRow>
-                                    <TableCell> 
-                                        <span style = {this.state.gitIssueL3Status.status}></span>
+                                    <TableCell>
+                                        <Tooltip
+                                            title = {this.state.gitIssueL3Status.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.gitIssueL3Status.status}></span>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell align = "center">
-                                            <p> L3 Issues </p>
+                                        <Tooltip 
+                                            title = "Number of L3 issues" 
+                                            placement = "top">
+                                                <p> L3 Issues </p>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell>
                                         <a href = { this.state.gitIssues.refLink } target="_blank"> 
@@ -774,10 +945,20 @@ class Checklist extends Widget {
                                 { /* Code Coverage */}
                                 <TableRow>
                                     <TableCell>
-                                        <span style = {this.state.codeCoverageStatus.status}></span>    
+                                        <Tooltip
+                                            title = {this.state.codeCoverageStatus.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.codeCoverageStatus.status}></span>    
+                                        </Tooltip>
+                                       
                                     </TableCell>
                                     <TableCell align = "center">
-                                        <p>Code coverage</p>
+                                        <Tooltip 
+                                            title = "Shows Code coverage statistics"
+                                            placement = "top">
+                                                <p>Code coverage</p>
+                                        </Tooltip>
+                                        
                                     </TableCell>
                                     <TableCell>
                                         <ul>
@@ -812,11 +993,20 @@ class Checklist extends Widget {
 
                                 { /* Merged PR count Status */}
                                 <TableRow>
-                                    <TableCell> 
-                                        <span style = {this.state.mergedPRCountStatus.status}></span>
+                                    <TableCell>
+                                        <Tooltip 
+                                            title = {this.state.mergedPRCountStatus.desc} 
+                                            placement = "right-end">
+                                                <span style = {this.state.mergedPRCountStatus.status}></span>
+                                        </Tooltip> 
+                                        
                                     </TableCell>
                                     <TableCell align = "center">
-                                            <p>Merged PRs with pending Doc tasks</p>
+                                        <Tooltip 
+                                            title = "Shows number of Merged PRs with pending Documentaion tasks"
+                                            placement = "top">
+                                                <p>Merged PRs with pending Doc tasks</p>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell>
                                         <a href = { this.state.mergedPRCount.refLink } target="_blank">
@@ -827,11 +1017,19 @@ class Checklist extends Widget {
 
                                 { /* Dependency Summary */}
                                 <TableRow>
-                                    <TableCell> 
-                                        <span style = {this.state.dependenctSummaryStatus.status}></span> 
+                                    <TableCell>
+                                        <Tooltip
+                                            title = {this.state.dependencySummaryStatus.desc}
+                                            placement = "right-end">
+                                                <span style = {this.state.dependencySummaryStatus.status}></span>
+                                        </Tooltip> 
                                     </TableCell>
                                     <TableCell align = "center">
-                                            <p>Dependancies where the next version available is smaller than a patch</p>
+                                        <Tooltip
+                                            title = "Shows number of Dependencies where the next verison available is smaller than a patch"
+                                            placement = "top">      
+                                                <p>Dependancies where the next version available is smaller than a patch</p>
+                                        </Tooltip>
                                     </TableCell>
                                     <TableCell>
                                         <a href = { this.state.dependencySummary.refLink } target="_blank">
