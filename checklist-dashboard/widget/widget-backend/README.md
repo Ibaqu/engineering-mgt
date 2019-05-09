@@ -18,3 +18,5 @@ engineering-mgt/checklist-dashboard/widget/**widget-backend**
 mvn clean install
 ```
 Place the resulted target/checklist-backend-service.jar in <SP_HOME>/libs
+
+Please update the POM dependencies if the jar doesnt deploy properly.
