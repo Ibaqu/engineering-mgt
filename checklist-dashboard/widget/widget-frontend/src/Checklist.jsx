@@ -41,6 +41,10 @@ const TableDiv_style = {
     overflowX: "auto",
 };
 
+const TableCell_style = {
+    color : '#33b5e5',
+}
+
 const TableBorder_style = {
     border: "2px solid #aaa",
     overflow: "auto"
@@ -76,6 +80,10 @@ const GREY = {
     backgroundColor: '#AFAFAF',
     borderRadius: '50%',
     display: 'inline-block'
+}
+
+const Link = {
+    color : '#23cBA7'
 }
 
 class Checklist extends Widget {
@@ -140,8 +148,6 @@ class Checklist extends Widget {
 
     componentDidMount() {
         const getProductNamesURL = hostUrl + '/products';
-        //const getProductNamesURL = "https://www.mocky.io/v2/5cbed162300000b9069ce2d1";
-       
         axios.create({
             withCredentials:false,
         })
@@ -170,7 +176,6 @@ class Checklist extends Widget {
             this.resetState();
            
             let versionURL = hostUrl + '/versions/' + this.state.selected_ProductName;
-            //let versionURL = "https://www.mocky.io/v2/5cbed19d300000ba069ce2d3";
             axios.create({
                 withCredentials : false,
             })
@@ -207,18 +212,14 @@ class Checklist extends Widget {
             let infoTitle = { version : this.state.selected_ProductVersion.versionTitle }
             
             let gitIssuesURL = hostUrl + '/gitIssues/' + this.state.selected_ProductName;
-            //let gitIssuesURL = "https://www.mocky.io/v2/5cc01e0a310000580b036090";
             gitIssuesURL = appendQuery(gitIssuesURL, infoVersion);
 
             let codeCoverageURL = hostUrl + '/codeCoverage/' + this.state.selected_ProductName;
-            //let codeCoverageURL = "https://www.mocky.io/v2/5cc0121a3100009f0a036018";
             
             let mergedPRCountURL = hostUrl + '/mprCount/' + this.state.selected_ProductName;
-            //let mergedPRCountURL = "https://www.mocky.io/v2/5cc012933100007e0f036024"    
             mergedPRCountURL = appendQuery(mergedPRCountURL, infoTitle);
 
             let dependencyURL = hostUrl + '/dependency/' + this.state.selected_ProductName;
-            //let dependencyURL = "https://www.mocky.io/v2/5cc011df310000170e036016";
 
             var jiraTypesArray = ['sec-scan', 'perf-report', 'commitment', 'sec-cust', 'sec-ext', 'sec-int'];
 
@@ -230,12 +231,8 @@ class Checklist extends Widget {
                 let jiraURL = hostUrl + '/jiraIssues/' + this.state.selected_ProductName;
                 jiraURL = appendQuery(jiraURL, Query);
 
-                console.log(jiraURL);
-
                 switch (jiraTypesArray[i]) {
                     case "sec-scan" : {
-                        console.log("Security Scan hit");
-
                         axios.create({
                             withCredentials : false,
                         })
@@ -269,8 +266,6 @@ class Checklist extends Widget {
                     }
 
                     case "perf-report" : {
-                        console.log("Performance report hit");
-
                         axios.create({
                             withCredentials : false,
                         })
@@ -300,14 +295,10 @@ class Checklist extends Widget {
                         ).catch(error => {
                             console.log(error);
                         });
-            
-
                         break;
                     }
 
                     case "commitment" : {
-                        console.log("Customer commitment hit");
-
                         axios.create({
                             withCredentials : false,
                         })
@@ -337,13 +328,10 @@ class Checklist extends Widget {
                         ).catch(error => {
                             console.log(error);
                         });
-
                         break;
                     }
 
                     case "sec-cust" : {
-                        console.log("Security Issues by customers hit");
-
                         axios.create({
                             withCredentials : false,
                         })
@@ -378,8 +366,6 @@ class Checklist extends Widget {
                     }
 
                     case "sec-ext" : {
-                        console.log("Security issues by external testing hit");
-
                         axios.create({
                             withCredentials : false,
                         })
@@ -615,9 +601,7 @@ class Checklist extends Widget {
             ).catch(error => {
                 console.log(error);
             });
-
         }
-
     }
 
     resetState() {
@@ -689,12 +673,11 @@ class Checklist extends Widget {
                                 inputProps = {{ 
                                     name : 'selected_ProductName',
                                     id : 'product-name' 
-                                }}
-                            >
-                                {this.state.productNameList.map(
-                                    (product) => <MenuItem value = {product.productName}> {product.productName} </MenuItem> 
-                                )}
-            
+                                }}>
+                                    {this.state.productNameList.map(
+                                        (product) => 
+                                            <MenuItem value = {product.productName}> {product.productName} </MenuItem> 
+                                    )}
                             </Select>
                         </FormControl>
 
@@ -707,12 +690,11 @@ class Checklist extends Widget {
                                 inputProps = {{
                                     name : 'selected_ProductVersion',
                                     id : 'product-version'
-                                }}
-                            >
-                                {this.state.productVersionList.map(
-                                    (version) => <MenuItem value = {version}> {version.versionTitle} </MenuItem>
-                                )}
-
+                                }}>
+                                    {this.state.productVersionList.map(
+                                        (version) => 
+                                            <MenuItem value = {version}> {version.versionTitle} </MenuItem>
+                                    )}
                             </Select>
                         </FormControl>
                     </div>
@@ -727,11 +709,11 @@ class Checklist extends Widget {
                             </colgroup>
                         
                             <TableHead>
-                                <TableCell style = {{ color : '#33b5e5'}}> <h3> Status </h3> </TableCell>
-                                <TableCell style = {{ color : '#33b5e5'}} align = "center"> 
+                                <TableCell style = { TableCell_style }> <h3> Status </h3> </TableCell>
+                                <TableCell style = { TableCell_style } align = "center"> 
                                     <h3> Metrics </h3> 
                                 </TableCell>
-                                <TableCell style = {{ color : '#33b5e5'}}> <h3> Progress </h3> </TableCell>
+                                <TableCell style = { TableCell_style }> <h3> Progress </h3> </TableCell>
                             </TableHead>
                         
                             <TableBody>
@@ -753,8 +735,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraSecScan.refLink} target="_blank"> 
-                                            {this.state.jiraSecScan.openIssues } open 
+                                        <a style = { Link } 
+                                            href = {this.state.jiraSecScan.refLink} 
+                                            target="_blank"> 
+                                                {this.state.jiraSecScan.openIssues } open 
                                         </a> / {this.state.jiraSecScan.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
@@ -776,8 +760,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraPerf.refLink} target="_blank"> 
-                                            {this.state.jiraPerf.openIssues } open 
+                                        <a style = { Link } 
+                                            href = {this.state.jiraPerf.refLink} 
+                                            target="_blank"> 
+                                                {this.state.jiraPerf.openIssues } open 
                                         </a> / {this.state.jiraPerf.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
@@ -797,8 +783,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraCommitment.refLink} target="_blank"> 
-                                            {this.state.jiraCommitment.openIssues } open 
+                                        <a style = { Link } 
+                                            href = {this.state.jiraCommitment.refLink} 
+                                            target="_blank"> 
+                                                {this.state.jiraCommitment.openIssues } open 
                                         </a> / {this.state.jiraCommitment.totalIssues } Total
                                         
                                     </TableCell>
@@ -821,8 +809,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraSecCust.refLink} target="_blank"> 
-                                            {this.state.jiraSecCust.openIssues } open 
+                                        <a style = { Link } 
+                                            href = {this.state.jiraSecCust.refLink} 
+                                            target="_blank"> 
+                                                {this.state.jiraSecCust.openIssues } open 
                                         </a> / {this.state.jiraSecCust.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
@@ -844,8 +834,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = {this.state.jiraSecExt.refLink} target="_blank"> 
-                                            {this.state.jiraSecExt.openIssues } open 
+                                        <a style = { Link } 
+                                            href = {this.state.jiraSecExt.refLink} 
+                                            target="_blank"> 
+                                                {this.state.jiraSecExt.openIssues } open 
                                         </a> / {this.state.jiraSecExt.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
@@ -867,8 +859,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell> 
-                                        <a href = {this.state.jiraSecInt.refLink} target="_blank"> 
-                                            {this.state.jiraSecInt.openIssues } open 
+                                        <a style = { Link } 
+                                            href = {this.state.jiraSecInt.refLink} 
+                                            target="_blank"> 
+                                                {this.state.jiraSecInt.openIssues } open 
                                         </a> / {this.state.jiraSecInt.totalIssues } Total
                                     </TableCell>
                                 </TableRow>
@@ -890,8 +884,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.gitIssues.refLink } target="_blank"> 
-                                            { this.state.gitIssues.L1Issues }
+                                        <a style = { Link } 
+                                            href = { this.state.gitIssues.refLink } 
+                                            target="_blank"> 
+                                                { this.state.gitIssues.L1Issues }
                                         </a> 
                                     </TableCell>
                                 </TableRow>
@@ -913,8 +909,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.gitIssues.refLink } target="_blank"> 
-                                            { this.state.gitIssues.L2Issues } 
+                                        <a style = { Link } 
+                                            href = { this.state.gitIssues.refLink } 
+                                            target="_blank"> 
+                                                { this.state.gitIssues.L2Issues } 
                                         </a>
                                     </TableCell>
                                 </TableRow>
@@ -936,8 +934,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.gitIssues.refLink } target="_blank"> 
-                                            { this.state.gitIssues.L3Issues }
+                                        <a style = { Link } 
+                                            href = { this.state.gitIssues.refLink } 
+                                            target="_blank"> 
+                                                { this.state.gitIssues.L3Issues }
                                         </a>
                                     </TableCell>
                                 </TableRow>
@@ -963,28 +963,38 @@ class Checklist extends Widget {
                                     <TableCell>
                                         <ul>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } target="_blank">
-                                                    { this.state.codeCoverage.instructionCov }
+                                                <a style = { Link } 
+                                                    href = { this.state.codeCoverage.refLink } 
+                                                    target="_blank">
+                                                        { this.state.codeCoverage.instructionCov }
                                                 </a> % : Instruction coverage
                                             </li>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } target="_blank">
-                                                    { this.state.codeCoverage.complexityCov }
+                                                <a style = { Link } 
+                                                    href = { this.state.codeCoverage.refLink } 
+                                                    target="_blank">
+                                                        { this.state.codeCoverage.complexityCov }
                                                 </a> % : Complexity coverage
                                             </li>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } target="_blank" >
-                                                    { this.state.codeCoverage.lineCov }
+                                                <a style = { Link } 
+                                                    href = { this.state.codeCoverage.refLink } 
+                                                    target="_blank" >
+                                                        { this.state.codeCoverage.lineCov }
                                                 </a> % : Line coverage
                                             </li>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } target="_blank" >
-                                                    { this.state.codeCoverage.methodCov }
+                                                <a style = { Link } 
+                                                    href = { this.state.codeCoverage.refLink } 
+                                                    target="_blank" >
+                                                        { this.state.codeCoverage.methodCov }
                                                 </a> % : Method coverage
                                             </li>
                                             <li>
-                                                <a href = { this.state.codeCoverage.refLink } target="_blank">
-                                                    { this.state.codeCoverage.classCov }
+                                                <a style = { Link } 
+                                                    href = { this.state.codeCoverage.refLink } 
+                                                    target="_blank">
+                                                        { this.state.codeCoverage.classCov }
                                                 </a> % : Class coverage 
                                             </li>
                                         </ul>
@@ -1009,8 +1019,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.mergedPRCount.refLink } target="_blank">
-                                            { this.state.mergedPRCount.mprCount }
+                                        <a style = { Link } 
+                                            href = { this.state.mergedPRCount.refLink } 
+                                            target="_blank">
+                                                { this.state.mergedPRCount.mprCount }
                                         </a> 
                                     </TableCell>
                                 </TableRow>
@@ -1032,8 +1044,10 @@ class Checklist extends Widget {
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
-                                        <a href = { this.state.dependencySummary.refLink } target="_blank">
-                                            { this.state.dependencySummary.dependencySummary }
+                                        <a style = { Link } 
+                                            href = { this.state.dependencySummary.refLink } 
+                                            target="_blank">
+                                                { this.state.dependencySummary.dependencySummary }
                                         </a> 
                                     </TableCell>
                                 </TableRow>
@@ -1041,7 +1055,7 @@ class Checklist extends Widget {
                             </TableBody>
                         </Table>
                     </div>
-                
+  
                 </div>
             </MuiThemeProvider>
         );
