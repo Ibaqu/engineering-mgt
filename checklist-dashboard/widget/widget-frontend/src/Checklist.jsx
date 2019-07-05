@@ -252,7 +252,7 @@ class Checklist extends Widget {
                                             this.setState({ 
                                                 jiraSecScanStatus : { 
                                                     status : GREEN,
-                                                    desc : "GREEN : No Security Scan reports are present"
+                                                    desc : "GREEN : No Security Scan reports are present HI"
                                                 } 
                                             });
                                         }
@@ -1038,9 +1038,9 @@ class Checklist extends Widget {
                                     </TableCell>
                                     <TableCell align = "center">
                                         <Tooltip
-                                            title = "Shows number of Dependencies where the next verison available is smaller than a patch"
+                                            title = "Shows number of Dependencies where the next verison available is smaller than a patch, is a patch version update and a minor version updates"
                                             placement = "top">      
-                                                <p>Dependancies where the next version available is smaller than a patch</p>
+                                                <p>Dependancy Summary</p>
                                         </Tooltip>
                                     </TableCell>
                                     <TableCell>
